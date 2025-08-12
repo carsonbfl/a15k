@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "select",
+    "property": "custom_model_data",
+    "fallback": {
+      "type": "model",
+      "model": "item/stick"
+    },
+    "cases": [
+      {
+        "when": "experience_cluster",
+        "model": {
+          "type": "minecraft:model",
+          "model": "item/experience_cluster"
+        }
+      },
+      {
+        "when": "experience_shard",
+        "model": {
+          "type": "model",
+          "model": "item/experience_shard"
+        }
+      }
+    ]
+  }
+}
