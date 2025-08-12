@@ -1,0 +1,42 @@
+# ===========================
+# Minecraft Server Ignore List
+# ===========================
+
+# Ignore entire save/world folders (server data)
+world/
+world_nether/
+world_the_end/
+saves/
+# Replace with your actual test world folder if different
+a15k-world/
+
+# Ignore common server log files and temporary data
+logs/
+*.log
+*.log.gz
+session.lock
+usercache.json
+whitelist.json
+banned-ips.json
+banned-players.json
+ops.json
+
+# Ignore crash reports
+crash-reports/
+
+# Ignore MC-Build cache files
+.mcb/fs-cache.txt
+
+# Ignore generated datapacks in saves (we keep source in repo instead)
+datapacks/**/pack.mcmeta  # only if generated
+datapacks/**/data/*       # only if generated
+
+# Ignore OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ===========================
+# End Ignore List
+# ===========================

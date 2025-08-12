@@ -1,0 +1,1 @@
+{"criteria":{"killed_hostile":{"trigger": "minecraft:player_killed_entity","conditions":{"entity":{"type": "#a15k:hostile"}}}},"rewards":{"function": "a15k:kill_mob"}}

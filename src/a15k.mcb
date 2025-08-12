@@ -1,0 +1,470 @@
+function a15k_load minecraft:load{
+  ## Scoreboards
+  scoreboard objectives add a15k_distance dummy
+  scoreboard objectives add a15k_required_level dummy
+  scoreboard objectives add a15k_math dummy
+  scoreboard objectives add a15k_level level {"text":"🧪","color":"green"}
+  scoreboard objectives setdisplay list a15k_level
+  scoreboard objectives setdisplay below_name a15k_level
+  scoreboard objectives add a15k_points dummy
+  scoreboard objectives add a15k_total_points dummy
+  scoreboard objectives add a15k_death deathCount
+  scoreboard objectives add a15k_probability dummy
+  scoreboard objectives add a15k_rolls dummy
+  scoreboard objectives add a15k_reload dummy
+  scoreboard objectives add a15k_stats trigger
+  scoreboard objectives add a15k_bar trigger
+  scoreboard objectives add a15k_bar_toggle dummy
+  
+  ## Constants
+  scoreboard players set .scale_overworld a15k_math 120
+  scoreboard players set .scale_nether a15k_math 15
+  scoreboard players set .5 a15k_math 5
+  scoreboard players set .2 a15k_math 2
+  scoreboard players set .9 a15k_math 9
+  scoreboard players set .15 a15k_math 15
+  scoreboard players set .15000 a15k_math 15000
+  scoreboard players set .math a15k_math 0
+  
+  ## Distance matrix
+  forceload add 0 0 
+  summon item_display 0. 0 0. {UUID:[I;0,0,0,0]}
+
+  
+  ## Gamerules & Misc
+  gamerule maxCommandChainLength 999999999
+  scoreboard players add .reload a15k_reload 1
+  tellraw @a [{"color":"#00FFEE","text":"{"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"bold":true,"color":"green","text":" 🧪"},{"color":"gray","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"color":"yellow","text":"(Re)-Initiated "},{"color":"green","score":{"name":".reload","objective":"a15k_reload"},"underlined":true},{"color":"yellow","text":" Reloads. "},{"color":"#05FF0D","text":"{"},{"color":"#04FD3D","text":"*"},{"color":"#03FC6E","text":"*"},{"color":"#02FA9E","text":"*"},{"color":"#00F7FF","text":"}"}]
+}
+
+## Tick Pipeline
+function a15k_tick minecraft:tick{
+  ## Player Tick
+  execute as @a at @s run block player_tick{
+    ## Enable Statistics & trigger tellraw
+    scoreboard players enable @s a15k_stats
+    scoreboard players enable @s a15k_bar 
+    execute if score @s a15k_stats matches 1.. run block stats{
+      ## Mob scaling
+      scoreboard players reset @s a15k_stats
+      execute store result storage minecraft:a15k mob_armor double .005 run scoreboard players get @s a15k_required_level
+      execute store result storage minecraft:a15k mob_armortoughness double .003 run scoreboard players get @s a15k_required_level
+      execute store result storage minecraft:a15k mob_dmg double .002 run scoreboard players get @s a15k_required_level
+      execute store result storage minecraft:a15k mob_knockback double .001 run scoreboard players get @s a15k_required_level
+      execute store result storage minecraft:a15k mob_speed double .00004 run scoreboard players get @s a15k_required_level
+      execute store result storage minecraft:a15k mob_level int 15 run scoreboard players get @s a15k_required_level
+  
+      execute unless score @s a15k_level matches 15000.. run tellraw @s [{"color":"#00FFEE","text":"{"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"bold":true,"color":"green","text":" 🧪"},{"color":"gray","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"bold":false,"color":"yellow","text":"Local Statistics "},{"bold":true,"color":"green","text":"📊 "},{"color":"dark_gray","text":"— "},{"bold":false,"color":"aqua","selector":"@s","underlined":true},{"color":"#00FFEE","text":" {"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Current level of the player."}]},"text":"\n• Player Level: "},{"bold":false,"color":"green","score":{"name":"@s","objective":"a15k_level"}},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Dropped in shard on death (in points). Maximum 15000 levels; 1010064720 points."}]},"text":"\n• Total Points: "},{"bold":false,"color":"green","score":{"name":"@s","objective":"a15k_total_points"}},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Player level >= Required level to not be set to adventure mode. \n 120 blocks / level =  Overworld Scale \n 15 blocks / level = Nether Scale \n (120 / level) + 15000 =  End Scale"}]},"text":"\n• Required Level: "},{"color":"green","score":{"name":"@s","objective":"a15k_required_level"}},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Number of blocks away from (0,0,0)."}]},"text":"\n• Distance: "},{"bold":false,"color":"yellow","nbt":"distance","storage":"minecraft:a15k"},{"color":"red","hover_event":{"action":"show_text","value":[{"text":"Hostile mob attribute scale per level requirement of area. \nAll dimensions have the same scale values, but required level scales indepedantly."}]},"text":"\n• Mob Scaling:"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Shard amount on kill given directly to player. 15 points per required level."}]},"text":"\n    - Points: "},{"bold":false,"color":"yellow","nbt":"mob_level","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".005 per Required Level."}]},"text":"\n    - Armor: "},{"bold":false,"color":"yellow","nbt":"mob_armor","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".003 per Required Level."}]},"text":"\n    - Armor Toughness: "},{"bold":false,"color":"yellow","nbt":"mob_armortoughness","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".002 per Required Level."}]},"text":"\n    - Damage: "},{"bold":false,"color":"yellow","nbt":"mob_dmg","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".001 per Required Level."}]},"text":"\n    - Knockback: "},{"bold":false,"color":"yellow","nbt":"mob_knockback","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".00004 per Required Level."}]},"text":"\n    - Speed: "},{"bold":false,"color":"yellow","nbt":"mob_speed","storage":"minecraft:a15k"}]
+
+      
+      execute if score @s a15k_level matches 15000.. run tellraw @s [{"color":"#00FFEE","text":"{"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"bold":true,"color":"green","text":" 🧪"},{"color":"gray","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"bold":false,"color":"yellow","text":"Local Statistics "},{"bold":true,"color":"green","text":"📊 "},{"color":"dark_gray","text":"— "},{"bold":false,"color":"aqua","selector":"@s","underlined":true},{"color":"#00FFEE","text":" {"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Current level of the player."}]},"text":"\n• Player Level: "},{"bold":false,"color":"green","score":{"name":"@s","objective":"a15k_level"}},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Dropped in shard on death (in points). Maximum 15000 levels; 1010064720 points."}]},"text":"\n• Total Points: "},{"bold":false,"color":"green","text":">1010064720 (Max shard drop!)"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Player level >= Required level to not be set to adventure mode. \n 120 blocks / level =  Overworld Scale \n 15 blocks / level = Nether Scale \n (120 / level) + 15000 =  End Scale"}]},"text":"\n• Required Level: "},{"color":"green","score":{"name":"@s","objective":"a15k_required_level"}},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Number of blocks away from (0,0,0)."}]},"text":"\n• Distance: "},{"bold":false,"color":"yellow","nbt":"distance","storage":"minecraft:a15k"},{"color":"red","hover_event":{"action":"show_text","value":[{"text":"Hostile mob attribute scale per level requirement of area. \nAll dimensions have the same scale values, but required level scales indepedantly."}]},"text":"\n• Mob Scaling:"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":"Shard amount on kill given directly to player. 15 points per required level."}]},"text":"\n    - Points: "},{"bold":false,"color":"yellow","nbt":"mob_level","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".005 per Required Level."}]},"text":"\n    - Armor: "},{"bold":false,"color":"yellow","nbt":"mob_armor","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".003 per Required Level."}]},"text":"\n    - Armor Toughness: "},{"bold":false,"color":"yellow","nbt":"mob_armortoughness","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".002 per Required Level."}]},"text":"\n    - Damage: "},{"bold":false,"color":"yellow","nbt":"mob_dmg","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".001 per Required Level."}]},"text":"\n    - Knockback: "},{"bold":false,"color":"yellow","nbt":"mob_knockback","storage":"minecraft:a15k"},{"color":"gray","hover_event":{"action":"show_text","value":[{"text":".00004 per Required Level."}]},"text":"\n    - Speed: "},{"bold":false,"color":"yellow","nbt":"mob_speed","storage":"minecraft:a15k"}]
+    }
+    execute if score @s a15k_bar matches 1.. run block bar{
+      scoreboard players reset @s a15k_bar
+      scoreboard players add @s a15k_bar_toggle 1
+      execute if score @s a15k_bar_toggle matches 2.. run scoreboard players set @s a15k_bar_toggle 0
+    }
+    
+    ## Player Level -> Points
+    execute store result score @s a15k_points run xp query @s points
+    execute if score @s a15k_level matches 0 run block lp1{
+      scoreboard players set .math a15k_math 0
+      scoreboard players operation .math a15k_math += @s a15k_points
+      scoreboard players operation @s a15k_total_points = .math a15k_math
+    }
+    execute if score @s a15k_level matches 1..16 run block lp2{
+      scoreboard players operation .math a15k_math = @s a15k_level
+      scoreboard players add .math a15k_math 6
+      scoreboard players operation .math a15k_math *= @s a15k_level
+      scoreboard players operation .math a15k_math += @s a15k_points
+      scoreboard players operation @s a15k_total_points = .math a15k_math
+    }
+    execute if score @s a15k_level matches 17..31 run block lp3{
+      scoreboard players operation .math a15k_math = @s a15k_level
+      scoreboard players operation .math a15k_math *= .5 a15k_math
+      scoreboard players remove .math a15k_math 81
+      scoreboard players operation .math a15k_math *= @s a15k_level
+      scoreboard players operation .math a15k_math /= .2 a15k_math
+      scoreboard players add .math a15k_math 360
+      scoreboard players operation .math a15k_math += @s a15k_points
+      scoreboard players operation @s a15k_total_points = .math a15k_math
+    }
+    execute if score @s a15k_level matches 32.. run block lp4{
+      scoreboard players operation .math a15k_math = @s a15k_level
+      scoreboard players operation .math a15k_math *= .9 a15k_math
+      scoreboard players remove .math a15k_math 325
+      scoreboard players operation .math a15k_math *= @s a15k_level
+      scoreboard players operation .math a15k_math /= .2 a15k_math
+      scoreboard players add .math a15k_math 2220
+      scoreboard players operation .math a15k_math += @s a15k_points
+      scoreboard players operation @s a15k_total_points = .math a15k_math
+    }
+
+    ## Player Position, Required Level, & Action bar 
+    execute store result storage minecraft:a15k x float 1 run data get entity @s Pos[0] 1
+    execute store result storage minecraft:a15k y float 1 run data get entity @s Pos[1] 1
+    execute store result storage minecraft:a15k z float 1 run data get entity @s Pos[2] 1
+    function a15k:global_distance with storage minecraft:a15k
+    execute if score @s[gamemode=!survival,tag=!a15k_op] a15k_level >= @s a15k_required_level run gamemode survival @s
+    execute if score @s[gamemode=!adventure,tag=!a15k_op] a15k_level < @s a15k_required_level run gamemode adventure @s
+    execute if entity @s[gamemode=survival] if score @s a15k_bar_toggle matches 0 run title @s actionbar [{"color":"dark_green","text":"🧪"},{"color":"white","score":{"name":"@s","objective":"a15k_required_level"}}," ",{"color":"gray","text":"⇄"},{"color":"white","score":{"name":"@s","objective":"a15k_distance"}}]
+    execute if entity @s[gamemode=creative] if score @s a15k_bar_toggle matches 0 run title @s actionbar [{"color":"dark_green","text":"🧪"},{"color":"white","score":{"name":"@s","objective":"a15k_required_level"}}," ",{"color":"gray","text":"⇄"},{"color":"white","score":{"name":"@s","objective":"a15k_distance"}}]
+    execute if entity @s[gamemode=adventure] if score @s a15k_bar_toggle matches 0 run title @s actionbar [{"color":"red","text":"🧪"},{"color":"white","score":{"name":"@s","objective":"a15k_required_level"}}," ",{"color":"gray","text":"⇄"},{"color":"white","score":{"name":"@s","objective":"a15k_distance"}}]
+
+    ## Shard drop on death when level >= 15; Cluster drop on death when level >= 15000
+    execute if score @s a15k_death matches 1.. run block player_death{
+      scoreboard players reset @s a15k_death
+      execute if score @s a15k_total_points matches 315.. unless score @s a15k_level matches 15000.. run block player_death_min{
+        execute store result storage minecraft:a15k points int 1 run scoreboard players get @s a15k_total_points
+        execute store result storage minecraft:a15k level int 1 run scoreboard players get @s a15k_level
+        block shard_spawn{ with storage minecraft:a15k {}
+          ## Args : (level,points)
+          $summon item ~ ~ ~ {Item:{id:"minecraft:stick",count:1,components:{"minecraft:custom_data":{points:$(points),level:$(level)},"minecraft:food":{nutrition:0,saturation:0,can_always_eat:true},"minecraft:lore":[[{"color":"white","text":"Points: "},{"color":"green","text":"$(points)"}]],"minecraft:custom_name":{"color":"light_purple","text":"Experience Shard"},"minecraft:enchantment_glint_override":true,"minecraft:consumable":{consume_seconds:999999},"minecraft:custom_model_data":{strings:["experience_shard"]}}}}
+          kill @n[type=experience_orb,nbt={Count:1,Value:3s}]
+          kill @n[type=experience_orb,nbt={Count:1,Value:7s}]
+          kill @n[type=experience_orb,nbt={Count:1,Value:17s}]
+          kill @n[type=experience_orb,nbt={Count:1,Value:73s}]
+        }
+      }
+      execute if score @s a15k_level matches 15000.. run block player_death_max{
+        execute store result storage minecraft:a15k level int 1 run scoreboard players get @s a15k_level
+        block shard_spawn_15000{ with storage minecraft:a15k {}
+          ## Args : (level); points are capped at 1010064720 = 15000 levels
+          $summon item ~ ~ ~ {Item:{id:"minecraft:stick",count:1,components:{"minecraft:custom_data":{points:1010064720,level:$(level)},"minecraft:food":{nutrition:0,saturation:0,can_always_eat:true},"minecraft:lore":[[{"color":"white","text":"Points: "},{"color":"green","text":"1010064720"}]],"minecraft:custom_name":{"color":"light_purple","text":"Experience Cluster"},"minecraft:enchantment_glint_override":true,"minecraft:consumable":{consume_seconds:999999},"minecraft:custom_model_data":{strings:["experience_shard"]}}}}
+          kill @n[type=experience_orb,nbt={Count:1,Value:3s}]
+          kill @n[type=experience_orb,nbt={Count:1,Value:7s}]
+          kill @n[type=experience_orb,nbt={Count:1,Value:17s}]
+          kill @n[type=experience_orb,nbt={Count:1,Value:73s}]
+        }
+      }
+    }
+
+    ## Ascensions when standing on enchantment table and level >= 1 while holding enchantable 
+    execute if predicate a15k:is_sneak_on_table if data entity @s SelectedItem.components."minecraft:enchantments" unless data entity @s SelectedItem.components."minecraft:custom_data".ascend if score @s a15k_level matches 1.. run block ascend_trigger{
+      # Summon armor stand
+      summon armor_stand ~ ~ ~ {NoGravity:1b,Silent:1b,Invulnerable:1b,Invisible:1b,Tags:["ascend_stand"]}
+      # Put ascension item in mainhand of armorstand
+      data modify entity @n[type=minecraft:armor_stand,tag=ascend_stand] equipment.mainhand set from entity @s SelectedItem 
+      # Set tags and lore via macro
+      data modify entity @n[type=minecraft:armor_stand,tag=ascend_stand] equipment.mainhand.components."minecraft:custom_data".ascend set value 1 
+      execute store result storage minecraft:a15k level int 1 run scoreboard players get @s a15k_level
+      execute as @n[type=minecraft:armor_stand,tag=ascend_stand] run block ascend_lore{ with storage minecraft:a15k {}
+        $data modify entity @n[type=minecraft:armor_stand,tag=ascend_stand] equipment.mainhand.components."minecraft:lore" set value [[{"color":"light_purple","text":"Ascended"},{"text":" at Level ","color":"gray"},{"text":"$(level)","color":"gold"}]]
+      }
+      # Set rolls = level, delete item and xp, and init ascend chain
+      execute store result score @n[type=minecraft:armor_stand,tag=ascend_stand] a15k_rolls run scoreboard players get @s a15k_level
+      item modify entity @s weapon.mainhand a15k:set_count
+      xp set @s 0 levels
+      ## ASCEND CHAIN 
+      execute as @n[type=minecraft:armor_stand,tag=ascend_stand] at @s run block ascend{ with storage minecraft:a15k {}
+        ## Run iterator
+        function a15k:ascend with storage minecraft:a15k
+        ## Loop or End 
+        execute if score @s a15k_rolls matches 0 run block end_ascend{
+          summon item ~ ~ ~ {Tags:["ascend_temp"],Item:{id:"minecraft:dirt",count:1}}
+          data modify entity @n[type=item,tag=ascend_temp] Item set from entity @s equipment.mainhand
+          tag @n[type=item,tag=ascend_temp] remove ascend_temp
+          function a15k:fx/ascend
+          kill @s
+        }
+        execute if score @s a15k_rolls matches 1.. run function a15k:player_tick/ascend_trigger/ascend
+      }
+    }
+  }
+
+  ## Mob Tick
+  execute as @e[type=#a15k:hostile,tag=!a15k_mob] at @s run block mob_tick{
+    ## TAG & POSITION SCALE
+    tag @s add a15k_mob
+    execute store result storage minecraft:a15k x float 1 run data get entity @s Pos[0] 1
+    execute store result storage minecraft:a15k y float 1 run data get entity @s Pos[1] 1
+    execute store result storage minecraft:a15k z float 1 run data get entity @s Pos[2] 1
+    function a15k:global_distance with storage minecraft:a15k
+
+    ## SCALING -> ATTRIBUTES
+    execute store result storage minecraft:a15k mob_armor double .005 run scoreboard players get @s a15k_required_level
+    execute store result storage minecraft:a15k mob_armortoughness double .003 run scoreboard players get @s a15k_required_level
+    execute store result storage minecraft:a15k mob_dmg double .002 run scoreboard players get @s a15k_required_level
+    execute store result storage minecraft:a15k mob_knockback double .001 run scoreboard players get @s a15k_required_level
+    execute store result storage minecraft:a15k mob_speed double .00004 run scoreboard players get @s a15k_required_level
+    scoreboard players reset @s a15k_required_level
+    block mob_attributes { with storage minecraft:a15k {}
+      $attribute @s minecraft:armor modifier add armor $(mob_armor) add_value
+      $attribute @s minecraft:armor_toughness modifier add armortoughness $(mob_armortoughness) add_value
+      $attribute @s minecraft:attack_damage modifier add atkdmg $(mob_dmg) add_value
+      $attribute @s minecraft:attack_knockback modifier add atkdmg $(mob_knockback) add_value
+      $attribute @s minecraft:movement_speed modifier add speed $(mob_speed) add_value
+    }
+  }
+}
+## Distance Functions
+function global_distance{
+  ## DISTANCE TO ORIGIN- scale[0] = √((x₂ - x₁)² + (y₂ - y₁)² + (z₂ - z₁)²); where xyz1 is 0,0,0 and xyz2 is entitypos
+  $data modify entity 0-0-0-0-0 transformation set value [$(x),0f,0f,0f,$(y),0f,0f,0f,$(z),0f,0f,0f,0f,0f,0f,1f]
+  data modify storage minecraft:a15k distance set from entity 0-0-0-0-0 transformation.scale[0]
+  execute if entity @s[type=minecraft:player] run execute store result score @s a15k_distance run data get storage minecraft:a15k distance
+  execute store result score @s a15k_required_level run data get storage minecraft:a15k distance
+  execute if dimension minecraft:overworld run scoreboard players operation @s a15k_required_level /= .scale_overworld a15k_math
+  execute if dimension minecraft:the_nether run scoreboard players operation @s a15k_required_level /= .scale_nether a15k_math
+  execute if dimension minecraft:the_end run block{
+    scoreboard players operation @s a15k_required_level /= .scale_overworld a15k_math
+    scoreboard players operation @s a15k_required_level += .15000 a15k_math
+  }
+}
+
+## Ascend Functions
+import ./enchants.js
+function ascend {
+  REPEAT (enchants) as e {
+     execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>" if score @s a15k_rolls matches 1.. run block{
+      scoreboard players remove @s a15k_rolls 1
+      execute store result score @s a15k_probability run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
+      scoreboard players operation @s a15k_probability *= @s a15k_probability
+      scoreboard players operation @s a15k_probability += .15 a15k_math
+      execute store result storage minecraft:a15k probability int 1 run scoreboard players get @s a15k_probability
+      function a15k:probability_macro with storage minecraft:a15k
+      execute if score @s a15k_probability matches 0 run block{
+        execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
+        scoreboard players add @s a15k_math 1
+        execute store result storage minecraft:a15k ascend int 1 run scoreboard players get @s a15k_math
+        data modify entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>" set from storage minecraft:a15k ascend
+      }
+    }
+  }
+}
+function probability_macro{
+  $execute store result score @s a15k_probability run random value 0..$(probability)
+}
+
+## Mob drops
+advancement kill_mob{
+  "criteria": {
+    "killed_hostile": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "#a15k:hostile"
+        }
+      }
+    }
+  },
+  "rewards": {
+    "function": "a15k:kill_mob"
+  }
+}
+function kill_mob{
+  advancement revoke @s only a15k:kill_mob
+  ## Required level * 15
+  execute store result storage minecraft:a15k mob_level int 15 run scoreboard players get @s a15k_required_level
+  execute unless score @s a15k_required_level matches 0 run block mob_drop{ with storage minecraft:a15k {}
+    ## Args : (mob_level); which is = a15k_required_level at kill time * 15
+    $give @s minecraft:stick[minecraft:custom_data={points:$(mob_level)},minecraft:food={nutrition:0,saturation:0,can_always_eat:true},minecraft:lore=[[{"text":"Points: ","color":"white"},{"text":"$(mob_level)","color":"green"}]],minecraft:custom_name={"text":"Experience Shard","color":"light_purple"},minecraft:enchantment_glint_override=true,minecraft:consumable={consume_seconds:999999},minecraft:custom_model_data={strings:["experience_shard"]}] 1
+  }
+}
+
+## Shard Functions and JSONs
+function shard_use{
+  execute if predicate a15k:shard_offhand unless predicate a15k:shard_mainhand run block shard_used_offhand{
+    execute store result storage minecraft:a15k points int 1 run data get entity @s equipment.offhand.components."minecraft:custom_data".points
+    item modify entity @s weapon.offhand a15k:set_count
+  }
+  execute if predicate a15k:shard_mainhand run block shard_used_mainhand{
+    execute store result storage minecraft:a15k points int 1 run data get entity @s SelectedItem.components."minecraft:custom_data".points 1
+    item modify entity @s weapon.mainhand a15k:set_count
+  }
+  summon minecraft:experience_orb ~ ~ ~ {Value:1s}
+  function a15k:shard_points with storage minecraft:a15k
+  advancement revoke @s only a15k:shard_use
+  execute positioned ~ ~.25 ~ rotated as @s rotated ~ 0 run function a15k:fx/shard
+}
+function shard_points{
+  $xp add @s $(points) points
+}
+advancement shard_use{
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:using_item",
+      "conditions": {
+        "item": {
+          "items": "minecraft:stick",
+          "components": {
+            "minecraft:food": {
+              "nutrition": 0,
+              "saturation": 0,
+              "can_always_eat": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "rewards": {
+    "function": "a15k:shard_use"
+  }
+}
+predicate shard_mainhand{
+  "condition": "minecraft:entity_properties",
+  "entity": "this",
+  "predicate": {
+    "type": "minecraft:player",
+    "equipment": {
+      "mainhand": {
+        "items": "minecraft:stick",
+        "components": {
+          "minecraft:food": {
+            "nutrition": 0,
+            "saturation": 0,
+            "can_always_eat": true
+          }
+        }
+      }
+    }
+  }
+}
+predicate shard_offhand{
+  "condition": "minecraft:entity_properties",
+  "entity": "this",
+  "predicate": {
+    "type": "minecraft:player",
+    "equipment": {
+      "offhand": {
+        "items": "minecraft:stick",
+        "components": {
+          "minecraft:food": {
+            "nutrition": 0,
+            "saturation": 0,
+            "can_always_eat": true
+          }
+        }
+      }
+    }
+  }
+}
+predicate is_sneak_on_table{
+  "condition": "minecraft:all_of",
+  "terms": [
+    {
+      "condition": "minecraft:entity_properties",
+      "entity": "this",
+      "predicate": {
+        "flags": {
+          "is_sneaking": true
+        },
+        "stepping_on": {
+          "block": {
+            "blocks": "minecraft:enchanting_table"
+          }
+        }
+      }
+    }
+  ]
+}
+item_modifier set_count{
+    "function": "minecraft:set_count",
+    "count": -1,
+    "add": true
+}
+
+## Utilities & Achievements
+function debug{
+  # List relevant scores in tellraw
+  tellraw @s ["",{"bold":true,"color":"gold","text":"📊 A15K Stats\n"},{"color":"gray","text":"Distance: "},{"score":{"name":"@s","objective":"a15k_distance"}},{"text":"\n"},{"color":"gray","text":"Required Level: "},{"score":{"name":"@s","objective":"a15k_required_level"}},{"text":"\n"},{"color":"gray","text":"Math: "},{"score":{"name":"@s","objective":"a15k_math"}},{"text":"\n"},{"color":"gray","text":"Level: "},{"score":{"name":"@s","objective":"a15k_level"}},{"text":"\n"},{"color":"gray","text":"Points: "},{"score":{"name":"@s","objective":"a15k_points"}},{"text":"\n"},{"color":"gray","text":"Total Points: "},{"score":{"name":"@s","objective":"a15k_total_points"}},{"text":"\n"},{"color":"gray","text":"Deaths: "},{"score":{"name":"@s","objective":"a15k_death"}},{"text":"\n"},{"color":"gray","text":"Probability: "},{"score":{"name":"@s","objective":"a15k_probability"}},{"text":"\n"},{"color":"gray","text":"Rolls: "},{"score":{"name":"@s","objective":"a15k_rolls"}}]
+}
+advancement join{
+  "display": {
+    "icon": {
+      "id": "minecraft:stick",
+      "components": {
+        "minecraft:custom_model_data": {
+          "strings": [
+            "experience_shard"
+          ]
+        }
+      }
+    },
+    "title": {
+      "text": "A15K"
+    },
+    "description": {
+      "text": "/trigger a15k_stats \n/trigger a15k_bar"
+    },
+    "background": "minecraft:block/blackstone",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "join": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "rewards": {"function": "a15k:player_init"}
+}
+function player_init{
+  scoreboard players enable @s a15k_stats
+  scoreboard players enable @s a15k_bar
+  scoreboard players set @s a15k_bar_toggle 0
+}
+
+## PARTICLE FX
+function fx/shard{
+  ## SOUNDS
+  playsound minecraft:block.respawn_anchor.deplete master @a ~ ~ ~ 1 2
+  ## STEPS=120, TURNS=2.25, HEIGHT=2.2, R_BASE=1.0, R_WAVE=0.25, WAVE_CYCLES=3
+  ## --------- HELIX A ---------
+  REPEAT (Array(120).fill(0).map(function(_,i){return i;})) as i {
+    # t=i/119; theta=2π*TURNS*t; r=R_BASE+R_WAVE*sin(2π*WAVE_CYCLES*t); y=HEIGHT*t
+    particle minecraft:ominous_spawning ^<% ((1.0 + 0.25*Math.sin(2*Math.PI*3*(i/119))) * Math.cos(2*Math.PI*2.25*(i/119))).toFixed(3) %> ^<% (2.2*(i/119)).toFixed(3) %> ^<% ((1.0 + 0.25*Math.sin(2*Math.PI*3*(i/119))) * Math.sin(2*Math.PI*2.25*(i/119))).toFixed(3) %> 0 0 0 0.01 1 force
+    particle minecraft:trial_spawner_detection_ominous ^<% ((1.0 + 0.25*Math.sin(2*Math.PI*3*(i/119))) * Math.cos(2*Math.PI*2.25*(i/119))).toFixed(3) %> ^<% (2.2*(i/119)).toFixed(3) %> ^<% ((1.0 + 0.25*Math.sin(2*Math.PI*3*(i/119))) * Math.sin(2*Math.PI*2.25*(i/119))).toFixed(3) %> 0 0 0 0.01 1 force
+  }
+
+  ## --------- HELIX B (180° offset) ---------
+  REPEAT (Array(120).fill(0).map(function(_,i){return i;})) as i {
+    particle minecraft:ominous_spawning ^<% ((1.0 + 0.25*Math.sin(2*Math.PI*3*(i/119))) * Math.cos(2*Math.PI*2.25*(i/119) + Math.PI)).toFixed(3) %> ^<% (2.2*(i/119)).toFixed(3) %> ^<% ((1.0 + 0.25*Math.sin(2*Math.PI*3*(i/119))) * Math.sin(2*Math.PI*2.25*(i/119) + Math.PI)).toFixed(3) %> 0 0 0 0.01 1 force
+    particle minecraft:trial_spawner_detection_ominous ^<% ((1.0 + 0.25*Math.sin(2*Math.PI*3*(i/119))) * Math.cos(2*Math.PI*2.25*(i/119) + Math.PI)).toFixed(3) %> ^<% (2.2*(i/119)).toFixed(3) %> ^<% ((1.0 + 0.25*Math.sin(2*Math.PI*3*(i/119))) * Math.sin(2*Math.PI*2.25*(i/119) + Math.PI)).toFixed(3) %> 0 0 0 0.01 1 force
+  }
+}
+function fx/ascend{
+  ## SOUNDS
+  playsound minecraft:block.enchantment_table.use master @a ~ ~ ~ 1 0
+  playsound minecraft:item.book.page_turn master @a ~ ~ ~ 1 0
+  playsound minecraft:block.amethyst_block.chime master @a ~ ~ ~ 1 2
+  playsound minecraft:block.amethyst_block.resonate master @a ~ ~ ~ 1 2
+
+  ## ---- OUTER RING (R=2.0, 64 pts) ----
+  REPEAT (Array(64).fill(0).map(function(_,i){return i;})) as i {
+    particle minecraft:ominous_spawning ~<% (2.0*Math.cos((2*Math.PI/64)*i)).toFixed(3) %> ~0.00 ~<% (2.0*Math.sin((2*Math.PI/64)*i)).toFixed(3) %> 0 0 0 0 1 force
+  }
+
+  ## ---- INNER RING (R=1.4, 48 pts) ----
+  REPEAT (Array(48).fill(0).map(function(_,i){return i;})) as i {
+    particle minecraft:ominous_spawning ~<% (1.4*Math.cos((2*Math.PI/48)*i)).toFixed(3) %> ~0.00 ~<% (1.4*Math.sin((2*Math.PI/48)*i)).toFixed(3) %> 0 0 0 0 1 force
+  }
+
+  ## ---- CENTER GLYPH RING (R=0.6, 24 pts) ----
+  REPEAT (Array(24).fill(0).map(function(_,i){return i;})) as i {
+    particle minecraft:ominous_spawning ~<% (0.6*Math.cos((2*Math.PI/24)*i)).toFixed(3) %> ~0.00 ~<% (0.6*Math.sin((2*Math.PI/24)*i)).toFixed(3) %> 0 0 0 0 1 force
+  }
+
+  ## ---- PENTAGRAM LINES (5-star, 20 samples per edge) ----
+  REPEAT (Array(5).fill(0).map(function(_,p){return p;})) as p {
+    REPEAT (Array(20).fill(0).map(function(_,s){return s;})) as s {
+      particle minecraft:ominous_spawning ~<% (2.0*Math.cos((2*Math.PI/5)*p) + (2.0*Math.cos((2*Math.PI/5)*((p+2)%5)) - 2.0*Math.cos((2*Math.PI/5)*p))*(s/19)).toFixed(3) %> ~0.00 ~<% (2.0*Math.sin((2*Math.PI/5)*p) + (2.0*Math.sin((2*Math.PI/5)*((p+2)%5)) - 2.0*Math.sin((2*Math.PI/5)*p))*(s/19)).toFixed(3) %> 0 0 0 0 1 force
+    }
+  }
+
+  ## ---- RADIAL SPOKES (8 spokes, inner→outer, 8 samples each) ----
+  REPEAT (Array(8).fill(0).map(function(_,r){return r;})) as r {
+    REPEAT (Array(8).fill(0).map(function(_,s){return s;})) as s {
+      particle minecraft:ominous_spawning ~<% (1.4*Math.cos((2*Math.PI/8)*r) + (2.0*Math.cos((2*Math.PI/8)*r) - 1.4*Math.cos((2*Math.PI/8)*r))*(s/7)).toFixed(3) %> ~0.00 ~<% (1.4*Math.sin((2*Math.PI/8)*r) + (2.0*Math.sin((2*Math.PI/8)*r) - 1.4*Math.sin((2*Math.PI/8)*r))*(s/7)).toFixed(3) %> 0 0 0 0 1 force
+    }
+  }
+
+  ## Small spiral: radius=0.75, height=2.0, turns=1.5, 56 steps
+  REPEAT (Array(56).fill(0).map(function(_,i){return i;})) as i {
+    particle minecraft:trial_spawner_detection ~<% (0.75*Math.cos(2*Math.PI*1.5*(i/55))).toFixed(3) %> ~<% (2.0*(i/55)).toFixed(3) %> ~<% (0.75*Math.sin(2*Math.PI*1.5*(i/55))).toFixed(3) %> 0 0 0 0 2 force
+    particle minecraft:enchant ~<% (0.75*Math.cos(2*Math.PI*1.5*(i/15))).toFixed(3) %> ~<% (2.0*(i/55)).toFixed(3) %> ~<% (0.75*Math.sin(2*Math.PI*1.5*(i/15))).toFixed(3) %> 0 0 0 0 1 force
+  }
+}
+
+
+
