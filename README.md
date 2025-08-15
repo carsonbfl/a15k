@@ -1,6 +1,6 @@
 # 🧪⇄ Anarchy 15000
-**A15K** is a distance-based progression system for Minecraft that locks building freedom and scales hostile mobs based on how far you travel from spawn.
-Additionally, players drop exact experience levels in shards and enchants can be ascended beyond normal limits.
+**A15K** is a distance-based progression system for Minecraft that locks building freedom and scales hostile mobs based on how far you travel from spawn.  
+Additionally, players drop exact experience levels in shards, and enchants can be ascended beyond normal limits.
 
 Your **player level** determines your maximum travel range — go too far without enough XP, and you’ll be forced into **Adventure Mode**.  
 Built for worlds meant to last **thousands of hours**, it introduces a **risk–reward** system that grows with your ambition.
@@ -25,29 +25,6 @@ Built for worlds meant to last **thousands of hours**, it introduces a **risk–
 
 ---
 
-## ✨ Enchantment Ascension
-
-**Prerequisites**
-- Have **experience levels** (at least 1).  
-- Hold an **enchanted item/tool** in your **main hand**.  
-- **Sneak** on an Enchantment Table to begin.
-
-**How it works (1 game tick)**
-1. System scans your item’s enchants **in order** from a curated list in `enchants.js`.  
-2. For each enchantment with level **x**, it rolls a die:  
-   **n = x² + 15** sides.  
-   - **Success:** enchant is **+1 level**.  
-   - **Fail:** no change.  
-3. **Every check consumes 1 roll** (1 XP level) whether it succeeds or fails.  
-4. Continues until all enchants are processed.
-
-**Notes**
-- All rolls for that activation are consumed during the process.  
-- Only **whitelisted enchants** are eligible (see `enchants.js`).  
-- Ascended items are **lore-marked** and **cannot be ascended again** (e.g., *“Ascended at Level X”*).
-
----
-
 ## 🛡️ Mob Scaling
 Hostile mobs scale their attributes based on the **required level** at their spawn location:
 
@@ -58,7 +35,82 @@ Hostile mobs scale their attributes based on the **required level** at their spa
 - Movement Speed  
 
 ---
+## ✨ Enchantment Ascension
 
+**Prerequisites**
+- Have **experience levels** (at least 1).  
+- Hold an **enchanted item/tool** in your **main hand**.  
+- **Sneak** on an Enchantment Table to begin.
+
+**How it works (1 game tick)**
+1. System scans your item’s enchants **in order**.
+2. For each enchantment with level **x**, it rolls a die:  
+   **n = x³ + 15** sides.  
+   - **Success:** enchant is **+1 level**.  
+   - **Fail:** no change.  
+3. **Every check consumes 1 roll** (1 XP level) whether it succeeds or fails.  
+4. Continues until all enchants are processed.
+
+**Notes**
+- All rolls for that activation are consumed during the process.  
+- Only **whitelisted enchants** are eligible (listed below).  
+- Ascended items are **lore-marked** and **cannot be ascended again** (e.g., *“Ascended at Level X”*).
+
+# Enchantment Groups (Max Level Value → Enchants)
+
+3:
+  - minecraft:depth_strider
+
+4:
+  - minecraft:breach
+
+5:
+  - minecraft:lure
+  - minecraft:quick_charge
+  - minecraft:swift_sneak
+
+7:
+  - minecraft:feather_falling
+
+10:
+  - minecraft:fire_protection
+  - minecraft:projectile_protection
+
+14:
+  - minecraft:frost_walker
+
+20:
+  - minecraft:protection
+
+127:
+  - minecraft:loyalty
+  - minecraft:piercing
+
+255:
+  - minecraft:blast_protection
+  - minecraft:efficiency
+  - minecraft:fire_aspect
+  - minecraft:fortune
+  - minecraft:knockback
+  - minecraft:looting
+  - minecraft:luck_of_the_sea
+  - minecraft:power
+  - minecraft:punch
+  - minecraft:respiration
+  - minecraft:soul_speed
+  - minecraft:sweeping_edge
+  - minecraft:unbreaking
+  - minecraft:density
+  - minecraft:wind_burst
+
+2147483647:
+  - minecraft:bane_of_arthropods
+  - minecraft:impaling
+  - minecraft:sharpness
+  - minecraft:smite
+  - minecraft:thorns
+
+---
 ## 📊 Commands
 
 ### **View Stats**  
