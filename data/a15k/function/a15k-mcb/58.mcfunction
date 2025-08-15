@@ -1,6 +1,5 @@
 # Generated with MC-Build
 
-execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:sweeping_edge"
-scoreboard players add @s a15k_math 1
-execute store result storage minecraft:a15k ascend int 1 run scoreboard players get @s a15k_math
-data modify entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:sweeping_edge" set from storage minecraft:a15k ascend
+execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:punch"
+scoreboard players remove @s a15k_rolls 1
+execute unless score @s a15k_math matches 255.. run function a15k:a15k-mcb/59

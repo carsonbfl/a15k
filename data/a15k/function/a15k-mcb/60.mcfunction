@@ -1,6 +1,6 @@
 # Generated with MC-Build
 
-execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:swift_sneak"
+execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:punch"
 scoreboard players add @s a15k_math 1
 execute store result storage minecraft:a15k ascend int 1 run scoreboard players get @s a15k_math
-data modify entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:swift_sneak" set from storage minecraft:a15k ascend
+data modify entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:punch" set from storage minecraft:a15k ascend

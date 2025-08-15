@@ -1,7 +1,7 @@
 # Generated with MC-Build
 
-scoreboard players remove @s a15k_rolls 1
-execute store result score @s a15k_probability run data get entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:impaling"
+execute store result score @s a15k_probability run data get entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:frost_walker"
+scoreboard players operation @s a15k_probability *= @s a15k_probability
 scoreboard players operation @s a15k_probability *= @s a15k_probability
 scoreboard players operation @s a15k_probability += .15 a15k_math
 execute store result storage minecraft:a15k probability int 1 run scoreboard players get @s a15k_probability

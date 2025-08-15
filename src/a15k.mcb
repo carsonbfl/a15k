@@ -149,7 +149,7 @@ function a15k_tick minecraft:tick{
       data modify entity @n[type=minecraft:armor_stand,tag=ascend_stand] equipment.mainhand.components."minecraft:custom_data".ascend set value 1 
       execute store result storage minecraft:a15k level int 1 run scoreboard players get @s a15k_level
       execute as @n[type=minecraft:armor_stand,tag=ascend_stand] run block ascend_lore{ with storage minecraft:a15k {}
-        $data modify entity @n[type=minecraft:armor_stand,tag=ascend_stand] equipment.mainhand.components."minecraft:lore" set value [[{"color":"light_purple","text":"Ascended"},{"text":" at Level ","color":"gray"},{"text":"$(level)","color":"gold"}]]
+        $data modify entity @n[type=minecraft:armor_stand,tag=ascend_stand] equipment.mainhand.components."minecraft:lore" set value [[{"color":"light_purple","text":"Ascended"},{"text":" at Level ","color":"gray"},{"text":"$(level)","color":"green"}]]
       }
       # Set rolls = level, delete item and xp, and init ascend chain
       execute store result score @n[type=minecraft:armor_stand,tag=ascend_stand] a15k_rolls run scoreboard players get @s a15k_level
@@ -213,27 +213,32 @@ function global_distance{
 }
 
 ## Ascend Functions
-import ./enchants.js
+function probability_macro{
+  $execute store result score @s a15k_probability run random value 0..$(probability)
+}
 function ascend {
-  REPEAT (enchants) as e {
-     execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>" if score @s a15k_rolls matches 1.. run block{
-      scoreboard players remove @s a15k_rolls 1
-      execute store result score @s a15k_probability run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
-      scoreboard players operation @s a15k_probability *= @s a15k_probability
-      scoreboard players operation @s a15k_probability += .15 a15k_math
-      execute store result storage minecraft:a15k probability int 1 run scoreboard players get @s a15k_probability
-      function a15k:probability_macro with storage minecraft:a15k
-      execute if score @s a15k_probability matches 0 run block{
+  REPEAT ([[3,["minecraft:depth_strider"]],[5,["minecraft:lure","minecraft:quick_charge","minecraft:swift_sneak"]],[7,["minecraft:feather_falling"]],[10,["minecraft:fire_protection","minecraft:projectile_protection"]],[14,["minecraft:frost_walker"]],[20,["minecraft:protection"]],[127,["minecraft:loyalty","minecraft:piercing"]],[255,["minecraft:blast_protection","minecraft:efficiency","minecraft:fire_aspect","minecraft:fortune","minecraft:knockback","minecraft:looting","minecraft:luck_of_the_sea","minecraft:power","minecraft:punch","minecraft:respiration","minecraft:soul_speed","minecraft:sweeping_edge","minecraft:unbreaking","minecraft:density","minecraft:wind_burst"]],[4,["minecraft:breach"]],[2147483647,["minecraft:bane_of_arthropods","minecraft:impaling","minecraft:sharpness","minecraft:smite","minecraft:thorns"]]]) as g {
+    REPEAT (g[1]) as e {
+      execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>" if score @s a15k_rolls matches 1.. run block{
         execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
-        scoreboard players add @s a15k_math 1
-        execute store result storage minecraft:a15k ascend int 1 run scoreboard players get @s a15k_math
-        data modify entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>" set from storage minecraft:a15k ascend
+        scoreboard players remove @s a15k_rolls 1
+        execute unless score @s a15k_math matches <% g[0] %>.. run block{
+          execute store result score @s a15k_probability run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
+          scoreboard players operation @s a15k_probability *= @s a15k_probability
+          scoreboard players operation @s a15k_probability *= @s a15k_probability
+          scoreboard players operation @s a15k_probability += .15 a15k_math
+          execute store result storage minecraft:a15k probability int 1 run scoreboard players get @s a15k_probability
+          function a15k:probability_macro with storage minecraft:a15k
+          execute if score @s a15k_probability matches 0 run block{
+            execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
+            scoreboard players add @s a15k_math 1
+            execute store result storage minecraft:a15k ascend int 1 run scoreboard players get @s a15k_math
+            data modify entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>" set from storage minecraft:a15k ascend
+          }
+        }
       }
     }
   }
-}
-function probability_macro{
-  $execute store result score @s a15k_probability run random value 0..$(probability)
 }
 
 ## Mob drops
