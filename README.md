@@ -1,4 +1,4 @@
-# a15k 🧪⇄
+# 🧪⇄ Anarchy 15000
 **A15K** is a distance-based progression system for Minecraft that locks building freedom and scales hostile mobs based on how far you travel from spawn.
 Additionally, players drop exact experience levels in shards and enchants can be ascended beyond normal limits.
 
