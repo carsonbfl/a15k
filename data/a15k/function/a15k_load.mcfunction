@@ -16,14 +16,20 @@ scoreboard objectives add a15k_reload dummy
 scoreboard objectives add a15k_stats trigger
 scoreboard objectives add a15k_bar trigger
 scoreboard objectives add a15k_bar_toggle dummy
+scoreboard objectives add a15k_const dummy
+scoreboard objectives add a15k_pctx10 dummy
+scoreboard objectives add a15k_pcti dummy
+scoreboard objectives add a15k_pctd dummy
+scoreboard objectives add a15k_tmp dummy
 ## Constants
 scoreboard players set .scale_overworld a15k_math 120
 scoreboard players set .scale_nether a15k_math 15
-scoreboard players set .5 a15k_math 5
-scoreboard players set .2 a15k_math 2
-scoreboard players set .9 a15k_math 9
-scoreboard players set .15 a15k_math 15
-scoreboard players set .15000 a15k_math 15000
+scoreboard players set .c5 a15k_math 5
+scoreboard players set .c2 a15k_math 2
+scoreboard players set .c9 a15k_math 9
+scoreboard players set .c10 a15k_math 10
+scoreboard players set .c15 a15k_math 15
+scoreboard players set .c15000 a15k_math 15000
 scoreboard players set .math a15k_math 0
 ## Distance matrix
 forceload add 0 0
