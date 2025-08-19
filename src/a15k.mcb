@@ -20,6 +20,7 @@ function a15k_load minecraft:load{
   scoreboard objectives add a15k_pcti dummy
   scoreboard objectives add a15k_pctd dummy
   scoreboard objectives add a15k_tmp dummy
+
   
   ## Constants
   scoreboard players set .scale_overworld a15k_math 120
@@ -296,20 +297,58 @@ function kill_mob{
 ## Shard Functions and JSONs
 function shard_use{
   execute if predicate a15k:shard_offhand unless predicate a15k:shard_mainhand run block shard_used_offhand{
-    execute store result storage minecraft:a15k points int 1 run data get entity @s equipment.offhand.components."minecraft:custom_data".points
-    item modify entity @s weapon.offhand a15k:set_count
+    execute store result score @s a15k_math run data get entity @s equipment.offhand.components."minecraft:custom_data".points
+    execute unless score @s a15k_math matches 33554431.. if predicate a15k:is_sneak run block{
+      execute store result score @s a15k_tmp run data get entity @s equipment.offhand.count
+      scoreboard players operation @s a15k_math *= @s a15k_tmp
+      execute store result storage minecraft:a15k points int 1 run scoreboard players get @s a15k_math
+      function a15k:shard_points with storage minecraft:a15k
+      function a15k:shard_mult_use_offhand
+    }
+    execute unless predicate a15k:is_sneak run block{
+      execute store result storage minecraft:a15k points int 1 run scoreboard players get @s a15k_math
+      function a15k:shard_points with storage minecraft:a15k
+      item modify entity @s weapon.offhand a15k:set_count
+    }
   }
   execute if predicate a15k:shard_mainhand run block shard_used_mainhand{
-    execute store result storage minecraft:a15k points int 1 run data get entity @s SelectedItem.components."minecraft:custom_data".points 1
-    item modify entity @s weapon.mainhand a15k:set_count
+    execute store result score @s a15k_math run data get entity @s SelectedItem.components."minecraft:custom_data".points 1
+    execute unless score @s a15k_math matches 33554431.. if predicate a15k:is_sneak run block{
+      execute store result score @s a15k_tmp run data get entity @s SelectedItem.count
+      scoreboard players operation @s a15k_math *= @s a15k_tmp
+      execute store result storage minecraft:a15k points int 1 run scoreboard players get @s a15k_math
+      function a15k:shard_points with storage minecraft:a15k
+      function a15k:shard_mult_use_mainhand
+    }
+    execute unless predicate a15k:is_sneak run block{
+      execute store result storage minecraft:a15k points int 1 run scoreboard players get @s a15k_math
+      function a15k:shard_points with storage minecraft:a15k
+      item modify entity @s weapon.mainhand a15k:set_count
+    }
   }
-  summon minecraft:experience_orb ~ ~ ~ {Value:1s}
-  function a15k:shard_points with storage minecraft:a15k
+  
   advancement revoke @s only a15k:shard_use
   execute positioned ~ ~.25 ~ rotated as @s rotated ~ 0 run function a15k:fx/shard
 }
+function shard_mult_use_mainhand{
+  summon minecraft:experience_orb ~ ~ ~ {Value:1s}
+  execute if score @s a15k_tmp matches 1.. run block{
+    scoreboard players remove @s a15k_tmp 1
+    item modify entity @s weapon.mainhand a15k:set_count
+    function a15k:shard_mult_use_mainhand 
+  }
+}
+function shard_mult_use_offhand{
+  summon minecraft:experience_orb ~ ~ ~ {Value:1s}
+  execute if score @s a15k_tmp matches 1.. run block{
+    scoreboard players remove @s a15k_tmp 1
+    item modify entity @s weapon.offhand a15k:set_count
+    function a15k:shard_mult_use_offhand
+  }
+}
 function shard_points{
   $xp add @s $(points) points
+  summon minecraft:experience_orb ~ ~ ~ {Value:1s}
 }
 advancement shard_use{
   "criteria": {
@@ -394,6 +433,16 @@ item_modifier set_count{
     "function": "minecraft:set_count",
     "count": -1,
     "add": true
+}
+predicate is_sneak{
+  "condition": "minecraft:entity_properties",
+  "entity": "this",
+  "predicate": {
+    "type": "minecraft:player",
+    "flags": {
+      "is_sneaking": true
+    }
+  }
 }
 
 ## Utilities & Achievements
