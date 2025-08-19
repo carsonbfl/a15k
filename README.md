@@ -25,6 +25,9 @@ Your **player level** determines how far you can roam — go too far without eno
 - Hostile mobs drop **XP Shards** based on the **local RL** where they were killed  
   → **15 XP points per RL**
 
+## Consumable 
+- Experience shards can be right-clicked to consume in either hand, or mass consumed by sneaking first. All shards consumed will also drop an extra point of experience for mending and possible loss.
+
 ---
 
 ## ✨ Enchantment Ascension
