@@ -58,9 +58,7 @@ A shared multiplicative bonus applies to these attributes using **spawn RL**:
   **Max Health**, **Attack Damage**, **Movement Speed**, **Flying Speed**, **Attack Speed**, **Follow Range**
 
 **Final:**  
-\[
-\text{base} \times \Big(1 + \frac{14 \times RL}{15000}\Big)
-\]
+base × (1 + (14 × RL / 15000))
 
 - RL **15,000** ⇒ **15×** (**+1400% of base**)  
 - Overworld world border (~30,000,000 blocks ⇒ RL **250,000**) ⇒ ~**234×**  
