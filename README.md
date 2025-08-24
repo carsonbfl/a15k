@@ -25,9 +25,6 @@ Your **player level** determines how far you can roam — go too far without eno
 - Hostile mobs drop **XP Shards** based on the **local RL** where they were killed  
   → **15 XP points per RL**
 
-## Consumable 
-- Experience shards can be right-clicked to consume in either hand, or mass consumed by sneaking first. All shards consumed will also drop an extra point of experience for mending and possible loss.
-
 ---
 
 ## ✨ Enchantment Ascension
@@ -39,40 +36,36 @@ Your **player level** determines how far you can roam — go too far without eno
 
 **Flow (per activation)**
 1. Enchants are processed in order
-2. For a level **x** enchant, roll **n = x² + 15**
+2. For a level **x** enchant, roll **n = 2x² + 15**
    - **Success:** enchant **+1 level**
    - **Fail:** no change
 3. Each check consumes **1 level**, success or fail
 4. Stops after all enchants are processed; item is lore-marked and **can’t be ascended again**
 
-> Some enchantments have "effective maxes" requiring me to impliment a cap on levels, therefore some ascensions may trigger and do nothing ie. depth strider 3 only will result in consuming all levels and no actual increment of the enchant.
-> Enchants eligible for ascension and there maxes can be found in ```enchants.md```
+> Some enchantments have "effective maxes" requiring caps. Enchants eligible for ascension and their maxes can be found in ```enchants.md```.
 
 ---
 
 ## 🛡️ Hostile Mob Scaling
 
 All scaling is driven by the **Required Level (RL)** at the mob’s **spawn location**.  
-Stats are applied **once** on the mob’s first tick (the mob gets the `a15k_mob` tag) and are **not reapplied** afterward — moving the mob won’t change its stats.
+Stats are applied **once** on the mob’s first tick (the mob gets the `a15k_mob` tag) and are **not** reapplied afterward — moving the mob won’t change its stats.
 
-### Floors (set once on spawn, then multiplied)
-On spawn, these attributes are given a base **floor** so even normally-zero stats scale.  
-They **also receive the multiplier** below.
-
-- **Armor**, **Armor Toughness**, **Attack Knockback**, **Knockback Resistance**  
-  **floor = `0.0015 × RL_spawn`**
-
-> Example: at RL **225** → floor **0.3375** for each; then the multiplier applies.
-
-### Multipliers (percent over base)
-A shared multiplicative bonus applies to **all** non-zero bases — including the floored ones above — using the **spawn RL**:
+### Multipliers (linear to 15×)
+A shared multiplicative bonus applies to these attributes using **spawn RL**:
 
 - **Armor**, **Armor Toughness**, **Attack Knockback**, **Knockback Resistance**,  
   **Max Health**, **Attack Damage**, **Movement Speed**, **Flying Speed**, **Attack Speed**, **Follow Range**
-- **Factor:** `f = RL_spawn / 15000` → final = **base × (1 + f)**  
-  - RL **15,000** ⇒ **+100%** (double the base/floor)
 
-> Your stats screen shows this as **“+X.Y% of base”**.
+**Final:**  
+\[
+\text{base} \times \Big(1 + \frac{14 \times RL}{15000}\Big)
+\]
+
+- RL **15,000** ⇒ **15×** (**+1400% of base**)  
+- Overworld world border (~30,000,000 blocks ⇒ RL **250,000**) ⇒ ~**234×**  
+- Nether world border (~30,000,000 blocks ⇒ RL **2,000,000**) ⇒ ~**1868×**
+
 
 ---
 
@@ -81,8 +74,8 @@ A shared multiplicative bonus applies to **all** non-zero bases — including th
 ### View Stats
 `/trigger a15k_stats`  
 Shows:
-- **Player Level**, **Total Points**, **Required Level**, **Distance** (labels underlined; white) with hover tips
-- **Mob Scaling:** single **percent of base** (hover lists affected attributes)
+- **Player Level**, **Total Points**, **Required Level**, **Distance** (labels with hover tips)
+- **Mob Scaling:** shown as **percent over base** (e.g., **+1400.0%** at RL 15,000). Hover lists affected attributes.
 - At ≥ **15,000**, Total Points shows a **max shard warning**
 
 ### Toggle Action Bar
@@ -92,3 +85,4 @@ Toggles a compact HUD:
 - **Distance from spawn**
 
 ---
+
