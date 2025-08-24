@@ -1,10 +1,5 @@
 # Generated with MC-Build
 
-## Floors
-$attribute @s minecraft:armor base set $(mob_floor)
-$attribute @s minecraft:armor_toughness base set $(mob_floor)
-$attribute @s minecraft:attack_knockback base set $(mob_floor)
-$attribute @s minecraft:knockback_resistance base set $(mob_floor)
 ## Mult
 $attribute @s minecraft:armor modifier add a15k $(mob_mult) add_multiplied_total
 $attribute @s minecraft:armor_toughness modifier add a15k $(mob_mult) add_multiplied_total
@@ -16,3 +11,6 @@ $attribute @s minecraft:flying_speed modifier add a15k $(mob_mult) add_multiplie
 $attribute @s minecraft:attack_speed modifier add a15k $(mob_mult) add_multiplied_total
 $attribute @s minecraft:follow_range modifier add a15k $(mob_mult) add_multiplied_total
 $attribute @s minecraft:attack_damage modifier add a15k $(mob_mult) add_multiplied_total
+## Heal to new max
+execute store result storage minecraft:a15k mob_heal double 1 run attribute @s minecraft:max_health get 1
+data modify entity @s Health set from storage minecraft:a15k mob_heal

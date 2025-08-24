@@ -51,11 +51,11 @@
     minecraft:unbreaking
     minecraft:density
     minecraft:wind_burst
-
-2147483647:
-
     minecraft:bane_of_arthropods
     minecraft:impaling
     minecraft:sharpness
     minecraft:smite
     minecraft:thorns
+
+
+    

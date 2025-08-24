@@ -3,7 +3,7 @@ function a15k_load minecraft:load{
   scoreboard objectives add a15k_distance dummy
   scoreboard objectives add a15k_required_level dummy
   scoreboard objectives add a15k_math dummy
-  scoreboard objectives add a15k_level level {"text":"🧪","color":"green"}
+  scoreboard objectives add a15k_level level {"text":"✦","color":"green"}
   scoreboard objectives setdisplay list a15k_level
   scoreboard objectives setdisplay below_name a15k_level
   scoreboard objectives add a15k_points dummy
@@ -15,13 +15,11 @@ function a15k_load minecraft:load{
   scoreboard objectives add a15k_stats trigger
   scoreboard objectives add a15k_bar trigger
   scoreboard objectives add a15k_bar_toggle dummy
-  scoreboard objectives add a15k_const dummy
-  scoreboard objectives add a15k_pctx10 dummy
-  scoreboard objectives add a15k_pcti dummy
-  scoreboard objectives add a15k_pctd dummy
   scoreboard objectives add a15k_tmp dummy
+  scoreboard objectives add a15k_multx10 dummy
+  scoreboard objectives add a15k_multi dummy
+  scoreboard objectives add a15k_multd dummy
 
-  
   ## Constants
   scoreboard players set .scale_overworld a15k_math 120
   scoreboard players set .scale_nether a15k_math 15
@@ -29,7 +27,9 @@ function a15k_load minecraft:load{
   scoreboard players set .c2 a15k_math 2
   scoreboard players set .c9 a15k_math 9
   scoreboard players set .c10 a15k_math 10
+  scoreboard players set .c14 a15k_math 14
   scoreboard players set .c15 a15k_math 15
+  scoreboard players set .c1500 a15k_math 1500
   scoreboard players set .c15000 a15k_math 15000
   scoreboard players set .math a15k_math 0
  
@@ -43,7 +43,8 @@ function a15k_load minecraft:load{
   ## Gamerules & Misc
   gamerule maxCommandChainLength 999999999
   scoreboard players add .reload a15k_reload 1
-  tellraw @a [{"color":"#00FFEE","text":"{"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"bold":true,"color":"green","text":" 🧪"},{"color":"gray","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"color":"yellow","text":"(Re)-Initiated "},{"color":"green","score":{"name":".reload","objective":"a15k_reload"},"underlined":true},{"color":"yellow","text":" Reloads. "},{"color":"#05FF0D","text":"{"},{"color":"#04FD3D","text":"*"},{"color":"#03FC6E","text":"*"},{"color":"#02FA9E","text":"*"},{"color":"#00F7FF","text":"}"}]
+  tellraw @a [{"color":"#00FFEE","text":"["},{"color":"#00FFC0","text":"✦"},{"color":"#00FF92","text":"✦"},{"color":"#00FF64","text":"✦"},{"color":"#00FF08","text":"]"},{"bold":true,"color":"green","text":" 🧪"},{"color":"white","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"color":"yellow","text":"(Re)-Initiated "},{"bold":true,"color":"green","score":{"name":".reload","objective":"a15k_reload"}},{"color":"yellow","text":" Reloads "},{"color":"#00FFEE","text":"["},{"color":"#00FFC0","text":"✦"},{"color":"#00FF92","text":"✦"},{"color":"#00FF64","text":"✦"},{"color":"#00FF08","text":"]"}]
+
 }
 
 ## Tick Pipeline
@@ -55,28 +56,34 @@ function a15k_tick minecraft:tick{
     scoreboard players enable @s a15k_bar 
     execute if score @s a15k_stats matches 1.. run block stats{
       scoreboard players reset @s a15k_stats
-      execute store result storage minecraft:a15k mob_floor double 0.0015 run scoreboard players get @s a15k_required_level
-      execute store result storage minecraft:a15k mob_mult double 0.0000666667 run scoreboard players get @s a15k_required_level
+
+      ## 15× at RL=15000  -> slope = (15-1)/15000 = 0.0009333...
+      execute store result storage minecraft:a15k mob_mult double 0.0009333 run scoreboard players get @s a15k_required_level
       execute store result storage minecraft:a15k mob_level int 15 run scoreboard players get @s a15k_required_level
 
-      ## percent with one decimal: pct = 100*f = 100*RL/15000      compute tenths-of-a-percent: RL/15 -> a15k_pctx10
+      ## percent with one decimal: pct = 1400 * RL / 15000
+      ## tenths-of-a-percent: pctx10 = (14 * RL) / 15
       scoreboard players operation @s a15k_pctx10 = @s a15k_required_level
+      scoreboard players operation @s a15k_pctx10 *= .c14 a15k_math
       scoreboard players operation @s a15k_pctx10 /= .c15 a15k_math
-      ## integer part floor(pct) = (RL/15)/10
+
+      ## integer part floor(pct) = floor(pctx10 / 10)
       scoreboard players operation @s a15k_pcti = @s a15k_pctx10
       scoreboard players operation @s a15k_pcti /= .c10 a15k_math
-      ## decimal digit = (RL/15) - 10*floor(RL/150)
+
+      ## decimal digit = pctx10 - 10*floor(pctx10/10)
       scoreboard players operation @s a15k_tmp = @s a15k_pcti
       scoreboard players operation @s a15k_tmp *= .c10 a15k_math
       scoreboard players operation @s a15k_pctd = @s a15k_pctx10
       scoreboard players operation @s a15k_pctd -= @s a15k_tmp
 
-      execute unless score @s a15k_level matches 15000.. run tellraw @s [{"color":"#00FFEE","text":"{"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"bold":true,"color":"green","text":" 🧪"},{"color":"gray","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"bold":false,"color":"yellow","text":"Local Statistics "},{"bold":true,"color":"green","text":"📊 "},{"color":"dark_gray","text":"— "},{"bold":false,"color":"aqua","selector":"@s","underlined":true},{"color":"#00FFEE","text":" {"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Current level of the player."}]},"text":"Player Level:"},{"color":"white","text":" "},{"bold":false,"color":"green","score":{"name":"@s","objective":"a15k_level"}},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Shard points dropped on death. Cap: 15,000 levels → 1,010,064,720 points."}]},"text":"Total Points:"},{"color":"white","text":" "},{"bold":false,"color":"green","score":{"name":"@s","objective":"a15k_total_points"}},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Overworld: 1 level / 120 blocks\nNether: 1 level / 15 blocks\nEnd: uses Overworld scale but baseline is level 15,000."}]},"text":"Required Level:"},{"color":"white","text":" "},{"color":"green","score":{"name":"@s","objective":"a15k_required_level"}},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Blocks from spawn (0,0,0)."}]},"text":"Distance:"},{"color":"white","text":" "},{"bold":false,"color":"yellow","nbt":"distance","storage":"minecraft:a15k"},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Armor, Armor Toughness, Attack Knockback, Knockback Resistance, Max Health, Movement Speed, Flying Speed, Attack Speed, Follow Range, Attack Damage.\n100% increase at 15,000 Required Level; scales beyond without hard cap."}]},"text":"Mob Scaling:","color":"red"},{"color":"red","text":" "},{"color":"yellow","text":"+"},{"bold":false,"color":"yellow","score":{"name":"@s","objective":"a15k_pcti"}},{"color":"yellow","text":"."},{"bold":false,"color":"yellow","score":{"name":"@s","objective":"a15k_pctd"}},{"color":"yellow","text":"% of base"}]
+      ## ---- Tellraws (one of the next two lines) ----
+      execute unless score @s a15k_level matches 15000.. run tellraw @s [{"color":"#00FFEE","text":"["},{"color":"#00FFC0","text":"✦"},{"color":"#00FF92","text":"✦"},{"color":"#00FF64","text":"✦"},{"color":"#00FF08","text":"]"},{"bold":true,"color":"green","text":" 🧪"},{"color":"white","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"bold":false,"color":"yellow","text":"Local Statistics "},{"bold":true,"color":"green","text":"📊 "},{"color":"dark_gray","text":"— "},{"bold":false,"color":"aqua","selector":"@s"},{"color":"#00FFEE","text":" ["},{"color":"#00FFC0","text":"✦"},{"color":"#00FF92","text":"✦"},{"color":"#00FF64","text":"✦"},{"color":"#00FF08","text":"]"},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Current level of the player."}]},"text":"Player Level:"},{"color":"white","text":" "},{"bold":false,"color":"green","score":{"name":"@s","objective":"a15k_level"}},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Shard points dropped on death. Cap: 15,000 levels → 1,010,064,720 points."}]},"text":"Total Points:"},{"color":"white","text":" "},{"bold":false,"color":"gold","score":{"name":"@s","objective":"a15k_total_points"}},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Overworld: 1 level / 120 blocks\nNether: 1 level / 15 blocks\nEnd: uses Overworld scale but baseline is level 15,000."}]},"text":"Required Level:"},{"color":"white","text":" "},{"color":"aqua","score":{"name":"@s","objective":"a15k_required_level"}},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Blocks from spawn (0,0,0)."}]},"text":"Distance:"},{"color":"white","text":" "},{"bold":false,"color":"aqua","nbt":"distance","storage":"minecraft:a15k"},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Armor, Armor Toughness, Attack Knockback, Knockback Resistance, Max Health, Movement Speed, Flying Speed, Attack Speed, Follow Range, Attack Damage.\n15× multiplier at 15,000 Required Level; linear with distance."}]},"text":"Mob Scaling:"},{"color":"white","text":" "},{"color":"red","text":"+"},{"bold":false,"color":"red","score":{"name":"@s","objective":"a15k_pcti"}},{"color":"red","text":"."},{"bold":false,"color":"red","score":{"name":"@s","objective":"a15k_pctd"}},{"color":"red","text":"% of base"}]
 
-      execute if score @s a15k_level matches 15000.. run tellraw @s [{"color":"#00FFEE","text":"{"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"bold":true,"color":"green","text":" 🧪"},{"color":"white","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"bold":false,"color":"yellow","text":"Local Statistics "},{"bold":true,"color":"green","text":"📊 "},{"color":"dark_gray","text":"— "},{"bold":false,"color":"aqua","selector":"@s","underlined":true},{"color":"#00FFEE","text":" {"},{"color":"#00FFC0","text":"*"},{"color":"#00FF92","text":"*"},{"color":"#00FF64","text":"*"},{"color":"#00FF08","text":"}"},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Current level of the player."}]},"text":"Player Level:"},{"color":"white","text":" "},{"bold":false,"color":"green","score":{"name":"@s","objective":"a15k_level"}},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Shard points dropped on death. Cap: 15,000 levels → 1,010,064,720 points."}]},"text":"Total Points:"},{"color":"white","text":" "},{"bold":false,"color":"green","text":">1010064720 (Max shard drop!)"},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Overworld: 1 level / 120 blocks\nNether: 1 level / 15 blocks\nEnd: uses Overworld scale but baseline is level 15,000."}]},"text":"Required Level:"},{"color":"white","text":" "},{"color":"green","score":{"name":"@s","objective":"a15k_required_level"}},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Blocks from spawn (0,0,0)."}]},"text":"Distance:"},{"color":"white","text":" "},{"bold":false,"color":"yellow","nbt":"distance","storage":"minecraft:a15k"},{"color":"white","text":"\n• "},{"color":"white","underlined":true,"hover_event":{"action":"show_text","value":[{"text":"Armor, Armor Toughness, Attack Knockback, Knockback Resistance, Max Health, Movement Speed, Flying Speed, Attack Speed, Follow Range, Attack Damage.\n100% increase at 15,000 Required Level; scales beyond without hard cap."}]},"text":"Mob Scaling:"},{"color":"white","text":" "},{"color":"yellow","text":"+"},{"bold":false,"color":"yellow","score":{"name":"@s","objective":"a15k_pcti"}},{"color":"yellow","text":"."},{"bold":false,"color":"yellow","score":{"name":"@s","objective":"a15k_pctd"}},{"color":"yellow","text":"% of base"}]
+
+      execute if score @s a15k_level matches 15000.. run tellraw @s [{"color":"#00FFEE","text":"["},{"color":"#00FFC0","text":"✦"},{"color":"#00FF92","text":"✦"},{"color":"#00FF64","text":"✦"},{"color":"#00FF08","text":"]"},{"bold":true,"color":"green","text":" 🧪"},{"color":"white","text":"⇄ "},{"color":"#05FF0D","text":"A"},{"color":"#05F94A","text":"1"},{"color":"#05F386","text":"5"},{"color":"#05E6FF","text":"K "},{"bold":false,"color":"yellow","text":"Local Statistics "},{"bold":true,"color":"green","text":"📊 "},{"color":"dark_gray","text":"— "},{"bold":false,"color":"aqua","selector":"@s"},{"color":"#00FFEE","text":" ["},{"color":"#00FFC0","text":"✦"},{"color":"#00FF92","text":"✦"},{"color":"#00FF64","text":"✦"},{"color":"#00FF08","text":"]"},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Current level of the player."}]},"text":"Player Level:"},{"color":"white","text":" "},{"bold":false,"color":"green","score":{"name":"@s","objective":"a15k_level"}},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Shard points dropped on death. Cap: 15,000 levels → 1,010,064,720 points."}]},"text":"Total Points:"},{"color":"white","text":" "},{"bold":false,"color":"gold","text":">1010064720 (Max shard drop!)"},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Overworld: 1 level / 120 blocks\nNether: 1 level / 15 blocks\nEnd: uses Overworld scale but baseline is level 15,000."}]},"text":"Required Level:"},{"color":"white","text":" "},{"color":"aqua","score":{"name":"@s","objective":"a15k_required_level"}},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Blocks from spawn (0,0,0)."}]},"text":"Distance:"},{"color":"white","text":" "},{"bold":false,"color":"aqua","nbt":"distance","storage":"minecraft:a15k"},{"color":"white","text":"\n• "},{"color":"white","hover_event":{"action":"show_text","value":[{"text":"Armor, Armor Toughness, Attack Knockback, Knockback Resistance, Max Health, Movement Speed, Flying Speed, Attack Speed, Follow Range, Attack Damage.\n15× multiplier at 15,000 Required Level; linear with distance."}]},"text":"Mob Scaling:"},{"color":"white","text":" "},{"color":"red","text":"+"},{"bold":false,"color":"red","score":{"name":"@s","objective":"a15k_pcti"}},{"color":"red","text":"."},{"bold":false,"color":"red","score":{"name":"@s","objective":"a15k_pctd"}},{"color":"red","text":"% of base"}]
 
     }
-
 
     execute if score @s a15k_bar matches 1.. run block bar{
       scoreboard players reset @s a15k_bar
@@ -199,17 +206,12 @@ function a15k_tick minecraft:tick{
     execute store result storage minecraft:a15k y float 1 run data get entity @s Pos[1] 1
     execute store result storage minecraft:a15k z float 1 run data get entity @s Pos[2] 1
     function a15k:global_distance with storage minecraft:a15k
-  
-    ## Scale 2x at 15000 levels
-    execute store result storage minecraft:a15k mob_mult double 0.0000666667 run scoreboard players get @s a15k_required_level
-    execute store result storage minecraft:a15k mob_floor double 0.0015 run scoreboard players get @s a15k_required_level
+
+    ## Scale 15x at 15000 levels  -> slope = (15-1)/15000 = 0.0009333...
+    execute store result storage minecraft:a15k mob_mult double 0.0009333 run scoreboard players get @s a15k_required_level
     scoreboard players reset @s a15k_required_level
+
     block mob_attributes { with storage minecraft:a15k {}
-      ## Floors
-      $attribute @s minecraft:armor base set $(mob_floor)
-      $attribute @s minecraft:armor_toughness base set $(mob_floor)
-      $attribute @s minecraft:attack_knockback base set $(mob_floor)
-      $attribute @s minecraft:knockback_resistance base set $(mob_floor)
       ## Mult
       $attribute @s minecraft:armor modifier add a15k $(mob_mult) add_multiplied_total
       $attribute @s minecraft:armor_toughness modifier add a15k $(mob_mult) add_multiplied_total
@@ -221,6 +223,10 @@ function a15k_tick minecraft:tick{
       $attribute @s minecraft:attack_speed modifier add a15k $(mob_mult) add_multiplied_total
       $attribute @s minecraft:follow_range modifier add a15k $(mob_mult) add_multiplied_total
       $attribute @s minecraft:attack_damage modifier add a15k $(mob_mult) add_multiplied_total
+
+      ## Heal to new max
+      execute store result storage minecraft:a15k mob_heal double 1 run attribute @s minecraft:max_health get 1
+      data modify entity @s Health set from storage minecraft:a15k mob_heal
     }
   }
 }
@@ -243,19 +249,28 @@ function global_distance{
 function probability_macro{
   $execute store result score @s a15k_probability run random value 0..$(probability)
 }
-function ascend {
-  REPEAT ([[3,["minecraft:depth_strider"]],[5,["minecraft:lure","minecraft:quick_charge","minecraft:swift_sneak"]],[7,["minecraft:feather_falling"]],[10,["minecraft:fire_protection","minecraft:projectile_protection"]],[14,["minecraft:frost_walker"]],[20,["minecraft:protection"]],[127,["minecraft:loyalty","minecraft:piercing"]],[255,["minecraft:blast_protection","minecraft:efficiency","minecraft:fire_aspect","minecraft:fortune","minecraft:knockback","minecraft:looting","minecraft:luck_of_the_sea","minecraft:power","minecraft:punch","minecraft:respiration","minecraft:soul_speed","minecraft:sweeping_edge","minecraft:unbreaking","minecraft:density","minecraft:wind_burst"]],[4,["minecraft:breach"]],[2147483647,["minecraft:bane_of_arthropods","minecraft:impaling","minecraft:sharpness","minecraft:smite","minecraft:thorns"]]]) as g {
+function ascend{
+  REPEAT ([[3,["minecraft:depth_strider"]],[5,["minecraft:lure","minecraft:quick_charge","minecraft:swift_sneak"]],[7,["minecraft:feather_falling"]],[10,["minecraft:fire_protection","minecraft:projectile_protection"]],[14,["minecraft:frost_walker"]],[20,["minecraft:protection"]],[127,["minecraft:loyalty","minecraft:piercing"]],[255,["minecraft:blast_protection","minecraft:efficiency","minecraft:fire_aspect","minecraft:fortune","minecraft:knockback","minecraft:looting","minecraft:luck_of_the_sea","minecraft:power","minecraft:punch","minecraft:respiration","minecraft:soul_speed","minecraft:sweeping_edge","minecraft:unbreaking","minecraft:density","minecraft:wind_burst","minecraft:bane_of_arthropods","minecraft:impaling","minecraft:sharpness","minecraft:smite","minecraft:thorns"]],[4,["minecraft:breach"]]]) as g {
     REPEAT (g[1]) as e {
       execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>" if score @s a15k_rolls matches 1.. run block{
+        ## current level -> a15k_math
         execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
         scoreboard players remove @s a15k_rolls 1
+
+        ## only attempt if current level < group cap g[0]
         execute unless score @s a15k_math matches <% g[0] %>.. run block{
+
+          ## ---- roll: n = 2*x^2 + 15 ----
           execute store result score @s a15k_probability run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
           scoreboard players operation @s a15k_probability *= @s a15k_probability
-          scoreboard players operation @s a15k_probability *= @s a15k_probability
+          scoreboard players operation @s a15k_probability *= .c2 a15k_math
           scoreboard players operation @s a15k_probability += .c15 a15k_math
+          ## --------------------------------
+
           execute store result storage minecraft:a15k probability int 1 run scoreboard players get @s a15k_probability
           function a15k:probability_macro with storage minecraft:a15k
+
+          ## on success
           execute if score @s a15k_probability matches 0 run block{
             execute store result score @s a15k_math run data get entity @s equipment.mainhand.components."minecraft:enchantments"."<% e %>"
             scoreboard players add @s a15k_math 1
@@ -267,6 +282,7 @@ function ascend {
     }
   }
 }
+
 
 ## Mob drops
 advancement kill_mob{

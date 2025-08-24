@@ -26,9 +26,9 @@ execute if data entity @s equipment.mainhand.components."minecraft:enchantments"
 execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:unbreaking" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/70
 execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:density" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/73
 execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:wind_burst" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/76
-execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:breach" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/79
-execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:bane_of_arthropods" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/82
-execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:impaling" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/85
-execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:sharpness" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/88
-execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:smite" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/91
-execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:thorns" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/94
+execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:bane_of_arthropods" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/79
+execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:impaling" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/82
+execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:sharpness" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/85
+execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:smite" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/88
+execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:thorns" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/91
+execute if data entity @s equipment.mainhand.components."minecraft:enchantments"."minecraft:breach" if score @s a15k_rolls matches 1.. run function a15k:a15k-mcb/94
